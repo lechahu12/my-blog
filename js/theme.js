@@ -9,6 +9,11 @@
 
   function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
+
+    const toggle = document.getElementById("theme-toggle");
+    if (!toggle) return;
+    toggle.setAttribute("aria-pressed", String(theme === "dark"));
+    toggle.setAttribute("aria-label", theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환");
   }
 
   applyTheme(getInitialTheme());
@@ -16,6 +21,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     const toggle = document.getElementById("theme-toggle");
     if (!toggle) return;
+    applyTheme(document.documentElement.getAttribute("data-theme"));
     toggle.addEventListener("click", () => {
       const current = document.documentElement.getAttribute("data-theme");
       const next = current === "dark" ? "light" : "dark";
