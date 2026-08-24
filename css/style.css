@@ -1,12 +1,19 @@
 :root {
-  --color-bg: #ffffff;
-  --color-text: #1a1a1a;
-  --color-text-muted: #6b6b6b;
-  --color-border: #e5e5e5;
-  --color-accent: #2563eb;
+  --color-bg: #f7f7fa;
+  --color-text: #1c1c24;
+  --color-text-muted: #5c5c6e;
+  --color-border: rgba(17, 17, 24, 0.08);
+  --color-accent: #6366f1;
+  --color-accent-2: #8b5cf6;
   --color-error: #dc2626;
-  --color-code-bg: #f4f4f5;
-  --color-card-bg: #fafafa;
+  --color-code-bg: #eeeef4;
+  --color-card-bg: rgba(255, 255, 255, 0.82);
+  --color-header-bg: rgba(255, 255, 255, 0.7);
+
+  --aurora-1: #c7d2fe;
+  --aurora-2: #ddd6fe;
+  --aurora-3: #e0e7ff;
+  --aurora-opacity: 0.35;
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Roboto, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
@@ -16,6 +23,10 @@
      고정값으로 대체했다 — 계산상 줄당 한글 약 40자로 WCAG CJK 권장치에 근접. */
   --content-width: 42rem;
 
+  --radius-lg: 1.5rem;
+  --radius-md: 1.25rem;
+  --radius-full: 999px;
+
   color-scheme: light dark;
 }
 
@@ -24,28 +35,42 @@
 }
 
 :root[data-theme="dark"] {
-  --color-bg: #121212;
-  --color-text: #e8e8e8;
-  --color-text-muted: #a0a0a0;
-  --color-border: #2e2e2e;
-  --color-accent: #60a5fa;
+  --color-bg: #121218;
+  --color-text: #e6e5ef;
+  --color-text-muted: #9b99b3;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-accent: #a5b4fc;
+  --color-accent-2: #c4b5fd;
   --color-error: #f87171;
-  --color-code-bg: #1e1e1e;
-  --color-card-bg: #1a1a1a;
+  --color-code-bg: #1b1a24;
+  --color-card-bg: rgba(26, 25, 35, 0.75);
+  --color-header-bg: rgba(18, 18, 24, 0.65);
+
+  --aurora-1: #3730a3;
+  --aurora-2: #4c1d95;
+  --aurora-3: #1e1b4b;
+  --aurora-opacity: 0.28;
 
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-bg: #121212;
-    --color-text: #e8e8e8;
-    --color-text-muted: #a0a0a0;
-    --color-border: #2e2e2e;
-    --color-accent: #60a5fa;
+    --color-bg: #121218;
+    --color-text: #e6e5ef;
+    --color-text-muted: #9b99b3;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-accent: #a5b4fc;
+    --color-accent-2: #c4b5fd;
     --color-error: #f87171;
-    --color-code-bg: #1e1e1e;
-    --color-card-bg: #1a1a1a;
+    --color-code-bg: #1b1a24;
+    --color-card-bg: rgba(26, 25, 35, 0.75);
+    --color-header-bg: rgba(18, 18, 24, 0.65);
+
+    --aurora-1: #3730a3;
+    --aurora-2: #4c1d95;
+    --aurora-3: #1e1b4b;
+    --aurora-opacity: 0.28;
   }
 }
 
@@ -55,12 +80,30 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: 1.125rem;
   line-height: 1.7;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* 오로라 배경: 이미지/외부 라이브러리 없이 블러 처리한 radial-gradient만으로
+   구현한다. 본문(z-index: 0)과 분리된 stacking context라 blur가 텍스트에는
+   영향을 주지 않는다. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(38rem 30rem at 12% -10%, var(--aurora-1), transparent 60%),
+    radial-gradient(34rem 28rem at 100% 0%, var(--aurora-2), transparent 60%),
+    radial-gradient(40rem 32rem at 50% 100%, var(--aurora-3), transparent 60%),
+    var(--color-bg);
+  opacity: var(--aurora-opacity);
+  filter: blur(100px);
 }
 
 .skip-link {
@@ -70,7 +113,7 @@ body {
   background: var(--color-accent);
   color: #fff;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: var(--radius-full);
   text-decoration: none;
   z-index: 100;
   transition: top 0.15s ease;
@@ -81,56 +124,106 @@ body {
 }
 
 .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 1rem;
+  background: var(--color-header-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--color-border);
 }
 
-.site-header a {
+.site-header .brand {
   color: var(--color-text);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.site-header .brand::before {
+  content: "\2726 ";
 }
 
 #theme-toggle {
-  background: none;
+  background: var(--color-card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   padding: 0.4rem 0.8rem;
   cursor: pointer;
   color: var(--color-text);
   font-size: 1rem;
   line-height: 1;
+  transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
 #theme-toggle:hover {
   border-color: var(--color-accent);
+  transform: translateY(-1px);
 }
 
 main {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 2rem 1rem 4rem;
+  padding: 2.5rem 1rem 4rem;
+}
+
+.page-intro {
+  margin-bottom: 2rem;
+}
+
+.page-intro h1 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(120deg, var(--color-accent), var(--color-accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.page-intro p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+#post-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
 }
 
 .post-card {
   display: block;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
+  padding: 1.5rem;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--color-card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(20, 10, 50, 0.05);
   text-decoration: none;
   color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .post-card:hover {
+  transform: translateY(-2px);
   border-color: var(--color-accent);
+  box-shadow: 0 10px 22px rgba(20, 10, 50, 0.08);
 }
 
 .post-card h2 {
@@ -150,8 +243,18 @@ main {
   color: var(--color-text-muted);
 }
 
+#post-content {
+  padding: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 18px rgba(20, 10, 50, 0.05);
+}
+
 .post-header h1 {
-  margin-bottom: 0.25rem;
+  margin: 0 0 0.35rem;
   font-weight: 800;
   letter-spacing: -0.01em;
 }
@@ -176,13 +279,15 @@ main {
 
 .post-body img {
   max-width: 100%;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 .post-body blockquote {
   border-left: 3px solid var(--color-accent);
   margin-left: 0;
-  padding-left: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-code-bg);
+  border-radius: 0 0.75rem 0.75rem 0;
   color: var(--color-text-muted);
 }
 
@@ -195,10 +300,24 @@ main {
 }
 
 .post-body pre {
+  position: relative;
   background: var(--color-code-bg);
-  padding: 1rem;
-  border-radius: 8px;
+  padding: 2.75rem 1.25rem 1.25rem;
+  border-radius: var(--radius-md);
   overflow-x: auto;
+}
+
+.post-body pre::before {
+  content: "";
+  position: absolute;
+  top: 1.1rem;
+  left: 1.25rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  box-shadow: 1.1em 0 0 var(--color-text-muted), 2.2em 0 0 var(--color-text-muted);
+  opacity: 0.35;
 }
 
 .post-body pre code {
@@ -208,18 +327,46 @@ main {
 }
 
 .back-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   margin-bottom: 1.5rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: var(--color-text-muted);
   text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .back-link:hover {
+  border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
 .error {
   color: var(--color-error);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-card,
+  #theme-toggle,
+  .back-link {
+    transition: none;
+  }
+
+  .post-card:hover {
+    transform: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -228,7 +375,11 @@ main {
   }
 
   main {
-    padding: 1.5rem 1rem 3rem;
+    padding: 1.75rem 1rem 3rem;
+  }
+
+  #post-content {
+    padding: 1.5rem;
   }
 
   body {
