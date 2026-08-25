@@ -208,7 +208,9 @@
     overlayEl.classList.add("hidden");
   }
 
-  function render() {
+  function render(mergedCells, newTiles) {
+    mergedCells = mergedCells || [];
+    newTiles = newTiles || [];
     boardEl.innerHTML = "";
 
     for (let i = 0; i < SIZE * SIZE; i++) {
@@ -231,6 +233,12 @@
         } else {
           tile.setAttribute("data-super", "true");
         }
+        if (mergedCells[r] && mergedCells[r][c]) {
+          tile.classList.add("merged");
+        }
+        if (newTiles.some((p) => p && p.r === r && p.c === c)) {
+          tile.classList.add("tile-new");
+        }
         boardEl.appendChild(tile);
       }
     }
@@ -242,11 +250,11 @@
     hasWon = false;
     keepPlayingAfterWin = false;
     gameOver = false;
-    addRandomTile(board);
-    addRandomTile(board);
+    const t1 = addRandomTile(board);
+    const t2 = addRandomTile(board);
     updateScoreDisplay();
     hideOverlay();
-    render();
+    render([], [t1, t2].filter(Boolean));
   }
 
   const KEY_DIRECTIONS = {

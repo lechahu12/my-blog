@@ -204,6 +204,9 @@ body {
   background: var(--tile-2-bg);
   color: var(--tile-2-fg);
   font-size: clamp(1rem, 6vw, 2rem);
+}
+
+.tile.tile-new {
   animation: tile-appear 0.15s ease;
 }
 
