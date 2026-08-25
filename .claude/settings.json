@@ -26,7 +26,15 @@
       "Bash(bash <(curl *))",
       "Bash(sh <(curl *))",
       "Bash(bash <(wget *))",
-      "Bash(sh <(wget *))"
+      "Bash(sh <(wget *))",
+      "Bash(git push --force*)",
+      "Bash(git push * --force*)",
+      "Bash(git push -f)",
+      "Bash(git push -f *)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)",
+      "Bash(git reset --hard*)",
+      "Bash(git reset * --hard*)"
     ]
   },
   "hooks": {
@@ -36,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=$(jq -r '.tool_input.command // empty'); if printf '%s' \"$cmd\" | grep -qiE '(^|[;&|]|[[:space:]])rm[[:space:]]+(-[A-Za-z]*r[A-Za-z]*f[A-Za-z]*|-[A-Za-z]*f[A-Za-z]*r[A-Za-z]*|--recursive[[:space:]]+--force|--force[[:space:]]+--recursive)([[:space:]]|$)' || printf '%s' \"$cmd\" | grep -qiE '(^|[;&|]|[[:space:]])sudo([[:space:]]|$)' || printf '%s' \"$cmd\" | grep -qiE 'chmod[[:space:]]+(-[A-Za-z]+[[:space:]]+)?777([[:space:]]|$)' || printf '%s' \"$cmd\" | grep -qiE '(curl|wget)\\b[^|;&]*\\|[[:space:]]*(sudo[[:space:]]+)?(sh|bash|zsh)\\b' || printf '%s' \"$cmd\" | grep -qiE '(bash|sh|zsh)[[:space:]]+<\\([[:space:]]*(curl|wget)\\b'; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Blocked by project policy: rm -rf, sudo, chmod 777, and curl|wget piped directly into a shell are not allowed.\"}}'; fi"
+            "command": "cmd=$(jq -r '.tool_input.command // empty'); if printf '%s' \"$cmd\" | grep -qiE '(^|[;&|]|[[:space:]])rm[[:space:]]+(-[A-Za-z]*r[A-Za-z]*f[A-Za-z]*|-[A-Za-z]*f[A-Za-z]*r[A-Za-z]*|--recursive[[:space:]]+--force|--force[[:space:]]+--recursive)([[:space:]]|$)' || printf '%s' \"$cmd\" | grep -qiE '(^|[;&|]|[[:space:]])sudo([[:space:]]|$)' || printf '%s' \"$cmd\" | grep -qiE 'chmod[[:space:]]+(-[A-Za-z]+[[:space:]]+)?777([[:space:]]|$)' || printf '%s' \"$cmd\" | grep -qiE '(curl|wget)\\b[^|;&]*\\|[[:space:]]*(sudo[[:space:]]+)?(sh|bash|zsh)\\b' || printf '%s' \"$cmd\" | grep -qiE '(bash|sh|zsh)[[:space:]]+<\\([[:space:]]*(curl|wget)\\b' || printf '%s' \"$cmd\" | grep -qiE 'git[[:space:]]+push\\b.*(--force([^-]|$)|[[:space:]]-f([[:space:]]|$))' || printf '%s' \"$cmd\" | grep -qiE 'git[[:space:]]+reset\\b.*--hard\\b'; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Blocked by project policy: rm -rf, sudo, chmod 777, curl|wget piped into a shell, force-pushing, and hard resets are not allowed.\"}}'; fi"
           }
         ]
       }
