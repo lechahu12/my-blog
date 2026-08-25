@@ -200,10 +200,22 @@ main {
   color: var(--color-text-muted);
 }
 
-#post-list {
+#post-list,
+#app-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1.25rem;
+}
+
+.apps-section {
+  margin-bottom: 2.5rem;
+}
+
+.apps-section h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .post-card {
@@ -226,7 +238,8 @@ main {
   box-shadow: 0 10px 22px rgba(20, 10, 50, 0.08);
 }
 
-.post-card h2 {
+.post-card h2,
+.post-card h3 {
   margin: 0 0 0.35rem;
   font-size: 1.25rem;
   font-weight: 700;
