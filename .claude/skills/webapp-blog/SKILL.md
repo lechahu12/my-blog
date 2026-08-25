@@ -57,7 +57,20 @@ Build 서브에이전트와 **반드시 다른** 서브에이전트를 새로 �
 
 Review 결과가 "배포 불가"면 Embed로 넘어가지 않고 사용자에게 알린 뒤 필요하면 Build를 다시 돌린다.
 
-## 4. Embed — 블로그에 게시 (직접 수행)
+## 4. Codex 교차 리뷰 (선택, 권장)
+
+3단계 Review까지 통과했다면, 추가로 OpenAI Codex CLI에게 같은 코드를 한 번 더 검토시킬 수 있다. 서로 다른 모델이 서로 다른 관점에서 보기 때문에, 한쪽이 놓친 문제를 다른 쪽이 잡아내는 경우가 실제로 많다. 이 단계는 새 서브에이전트를 띄우는 게 아니라, 지금 세션에서 Codex CLI를 도구처럼 직접 호출하는 것이다.
+
+**사전 조건**: 로컬 환경에 Codex CLI가 설치·로그인되어 있어야 한다. 안 되어 있다면 `/plugin marketplace add openai/codex-plugin-cc` → `/plugin install codex@openai-codex` → `/reload-plugins` → `/codex:setup` 순서로 준비한다(헤드리스/원격 환경은 브라우저 로그인 대신 `codex login --device-auth` 사용). 이미 준비돼 있다면 `/codex:setup`만 실행해도 상태를 재확인해준다. **Codex가 준비되지 않은 환경이면 이 단계는 건너뛰고 바로 5단계 Embed로 진행한다** — 필수 단계가 아니다.
+
+**진행 방법**:
+1. Codex를 호출해 `apps/{{APP_SLUG}}/`의 코드를 리뷰시킨다. `review.md`의 기존 평가를 참고하되, 거기서 다루지 않은 새로운 문제를 `gemini-review.md`에 작성하게 한다.
+   예시 프롬프트: "코덱스를 호출해서 apps/{{APP_SLUG}} 코드를 리뷰시켜줘. review.md에 있는 기존 평가를 참고하되, 추가로 발견한 문제를 gemini-review.md에 작성하게 해줘."
+2. Codex 작업이 끝나면 `gemini-review.md`를 읽는다. 타당한 지적은 `apps/{{APP_SLUG}}/` 범위 내에서 직접 수정한다(Build/Review와 같은 수정 범위 원칙 적용). 구조적으로 큰 지적이면 고치지 말고 `gemini-review.md`에 기록된 그대로 사용자에게 보고한다.
+3. 매번 이 단계를 빠뜨리지 않고 강제하고 싶다면 `/codex:setup --enable-review-gate`로 "Codex 리뷰 없이는 작업을 완료(stop) 처리할 수 없는" 게이트를 켤 수 있다. 이 설정은 세션/환경 단위로 적용되므로 한 번 켜두면 이후 웹앱 작업에도 계속 적용된다.
+4. `gemini-review.md`가 생성됐다면 review.md와 함께 5단계에서 커밋한다.
+
+## 5. Embed — 블로그에 게시 (직접 수행)
 
 Review를 통과하면 네가 직접 (서브에이전트 없이) 처리한다:
 
@@ -68,7 +81,7 @@ Review를 통과하면 네가 직접 (서브에이전트 없이) 처리한다:
      <p class="post-summary">{{한 줄 설명}}</p>
    </a>
    ```
-2. `git add` / `git commit`으로 새 앱 폴더, `index.html` 변경, `spec.md`/`build-instructions.md`/`review-instructions.md`/`review.md`를 커밋한다. 커밋 메시지는 무엇을 추가했는지 간단히 요약한다.
+2. `git add` / `git commit`으로 새 앱 폴더, `index.html` 변경, `spec.md`/`build-instructions.md`/`review-instructions.md`/`review.md`/`gemini-review.md`(있다면)를 커밋한다. 커밋 메시지는 무엇을 추가했는지 간단히 요약한다.
 3. push는 사용자가 명시적으로 요청했을 때만 한다 (일반 git 안전 수칙과 동일).
 
 ## 폴더 구조 / 웹앱 규칙 요약
@@ -78,6 +91,17 @@ Review를 통과하면 네가 직접 (서브에이전트 없이) 처리한다:
 - 모바일에서도 정상 동작해야 한다.
 - **모든 웹앱은 블로그의 색상 팔레트를 따른다.** `css/style.css`의 CSS 변수를 참조해서 앱 자체 `style.css`에 동일한 값을 반영한다 (자체 완결을 지키기 위해 값을 복제하는 것이지, 블로그 stylesheet를 직접 import하는 게 아니다).
 - **모든 웹앱에 사용법 안내 문구를 반드시 포함한다.** 화면 어딘가에서 사용자가 바로 확인할 수 있어야 한다.
+
+## 권장 퍼미션 설정
+
+이 하네스는 서브에이전트를 여러 번 띄우고, 로컬 서버 실행·git 커밋·(선택) Codex CLI 호출까지 반복적으로 수행한다. 매번 도구 실행을 승인받으면 작업이 끊기므로, 저장소 루트의 `.claude/settings.json`에 이 워크플로에 필요한 권한을 미리 등록해두는 걸 권장한다.
+
+이 저장소에는 다음 원칙으로 구성된 `.claude/settings.json`이 이미 포함되어 있다:
+- **자동 허용**: 이 하네스가 반복적으로 쓰는 안전한 동작 — 파일 읽기/쓰기/수정, git 조회·스테이징·커밋, 로컬 미리보기 서버 실행(`python3 -m http.server` 등), Codex CLI 설치/로그인/호출.
+- **매번 확인**: `git push` — 저장소 밖(원격)으로 나가는 동작이라 사용자 승인 없이는 실행하지 않는다(`CLAUDE.md`/`서브에이전트 규칙`의 안전 원칙과 동일).
+- **항상 거부**: `rm -rf`, `git push --force`, `git reset --hard` 같은 파괴적 명령. 필요하다면 사용자에게 직접 요청하게 한다.
+
+새 프로젝트에 이 스킬을 그대로 옮겨 쓴다면, `.claude/settings.json`도 함께 복사하고 프로젝트 성격에 맞게 allow/ask/deny 목록을 조정할 것을 권한다.
 
 ## 서브에이전트 규칙
 
@@ -91,3 +115,4 @@ Review를 통과하면 네가 직접 (서브에이전트 없이) 처리한다:
 - `assets/build-instructions-template.md` — Build 지침 파일 구조
 - `assets/review-instructions-template.md` — Review 지침 파일 구조
 - 실제 예시가 필요하면 이 저장소의 git 히스토리에 있는 과거 `spec.md`/`build-instructions.md`/`review-instructions.md`/`review.md` (2048, 픽셀 아트 에디터 빌드 당시 작성분)를 참고해도 좋다.
+- 저장소 루트의 `.claude/settings.json` — "권장 퍼미션 설정" 절에서 설명한 실제 권한 설정 파일.
