@@ -6,6 +6,27 @@
       "Bash(npm test *)",
       "Bash(npx live-server)",
       "Bash(npx live-server *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(chmod 777 *)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | sh *)",
+      "Bash(curl * | bash)",
+      "Bash(curl * | bash *)",
+      "Bash(curl * | sudo sh)",
+      "Bash(curl * | sudo bash)",
+      "Bash(wget * | sh)",
+      "Bash(wget * | sh *)",
+      "Bash(wget * | bash)",
+      "Bash(wget * | bash *)",
+      "Bash(wget * | sudo sh)",
+      "Bash(wget * | sudo bash)",
+      "Bash(bash <(curl *))",
+      "Bash(sh <(curl *))",
+      "Bash(bash <(wget *))",
+      "Bash(sh <(wget *))"
     ]
   }
 }
