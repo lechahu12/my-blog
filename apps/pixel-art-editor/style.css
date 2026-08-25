@@ -137,6 +137,12 @@ body {
   display: inline-flex;
   width: 40px;
   height: 40px;
+  border-radius: 6px;
+}
+
+.custom-color-label.active {
+  box-shadow: 0 0 0 2px var(--swatch-selected);
+  border-radius: 8px;
 }
 
 #custom-color {

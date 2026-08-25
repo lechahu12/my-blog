@@ -9,6 +9,7 @@
 
   var palette = document.getElementById("palette");
   var customColorInput = document.getElementById("custom-color");
+  var customColorLabel = document.querySelector(".custom-color-label");
   var eraserBtn = document.getElementById("eraser-btn");
   var clearBtn = document.getElementById("clear-btn");
   var saveBtn = document.getElementById("save-btn");
@@ -157,6 +158,7 @@
     currentColor = btn.getAttribute("data-color");
     currentTool = "draw";
     setActiveSwatch(btn);
+    if (customColorLabel) customColorLabel.classList.remove("active");
     eraserBtn.setAttribute("aria-pressed", "false");
   });
 
@@ -164,6 +166,7 @@
     currentColor = customColorInput.value;
     currentTool = "draw";
     setActiveSwatch(null);
+    if (customColorLabel) customColorLabel.classList.add("active");
     eraserBtn.setAttribute("aria-pressed", "false");
   });
 
@@ -173,6 +176,7 @@
     eraserBtn.setAttribute("aria-pressed", currentTool === "erase" ? "true" : "false");
     if (currentTool === "erase") {
       setActiveSwatch(null);
+      if (customColorLabel) customColorLabel.classList.remove("active");
     }
   });
 
