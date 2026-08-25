@@ -1,51 +1,42 @@
-# Build 지침 — 2048 게임
+# Build 지침 — 픽셀 아트 에디터
 
-이 문서는 `/home/user/my-blog/spec.md` 계획에 따라 2048 게임을 구현하기 위한 Build 서브에이전트 전용 지침이다.
+이 문서는 `/home/user/my-blog/spec.md` 계획에 따라 픽셀 아트 에디터를 구현하기 위한 Build 서브에이전트 전용 지침이다.
 
 ## 수정 범위 (반드시 준수)
 
-- **오직 `/home/user/my-blog/apps/2048/` 폴더 안의 파일만 새로 만들거나 수정한다.**
+- **오직 `/home/user/my-blog/apps/pixel-art-editor/` 폴더 안의 파일만 새로 만들거나 수정한다.**
 - 블로그 본체 파일(`index.html`, `css/style.css`, `js/*.js`, `posts/*`, `README.md`, `CLAUDE.md`)은 **절대 건드리지 않는다.**
-- `spec.md`, `build-instructions.md`, `review.md` 등 계획/검증 문서도 건드리지 않는다.
+- `spec.md`, `build-instructions.md`, `review.md`, `review-instructions.md` 등 계획/검증 문서도 건드리지 않는다.
+- 다른 앱 폴더(`apps/2048/`)도 건드리지 않는다(참고용으로 읽기만 한다).
 
 ## 만들 파일
 
 ```
-apps/2048/index.html
-apps/2048/style.css
-apps/2048/script.js
+apps/pixel-art-editor/index.html
+apps/pixel-art-editor/style.css
+apps/pixel-art-editor/script.js
 ```
 
-## 요구사항 (spec.md 요약)
+## 요구사항 (spec.md 요약, 반드시 spec.md 전체를 먼저 읽고 그대로 구현할 것)
 
-### 게임 로직
-- 4x4 격자(2차원 배열), 0은 빈 칸.
-- 시작 시 무작위 빈 칸 2곳에 타일 생성 (90% 확률 2, 10% 확률 4).
-- 키보드 방향키(↑↓←→)로 타일을 해당 방향 끝까지 밀고, 인접한 같은 값은 합쳐서 2배가 된다. 한 번의 이동에서 같은 타일이 두 번 병합되지 않도록 처리.
-- 모바일 터치 스와이프(상/하/좌/우)도 방향키와 동일하게 동작해야 한다 (임계값 약 30px).
-- 이동으로 보드에 실제 변화가 있었을 때만 새 타일 1개를 추가한다.
-- 병합될 때마다 합쳐진 값을 점수에 더한다.
-- 게임 오버 판정: 빈 칸이 없고 인접한 동일 값 쌍도 없으면 게임 오버 오버레이 표시.
-- 승리 판정: 2048 타일이 처음 등장하면 "You Win" 오버레이 표시 + "계속하기" 버튼으로 이어서 플레이 가능.
-- 재시작 버튼: 보드/현재 점수 초기화, 최고 점수는 유지.
+1. **격자**: 16x16 격자를 단일 `<canvas>`로 렌더링. `devicePixelRatio` 보정, `imageSmoothingEnabled = false`, 빈 칸은 체크보드 패턴, 셀 사이 얇은 격자선(편집 캔버스에만).
+2. **좌표 변환**: `getBoundingClientRect()` 기반으로 마우스/터치 공통 좌표 → 셀 인덱스 계산.
+3. **팔레트**: 16색 기본 스와치 버튼 + `<input type="color">` 커스텀 색상 선택기. 선택 시 `aria-pressed` 갱신.
+4. **그리기**: Pointer Events(`pointerdown/move/up/cancel/leave`)로 마우스+터치 통합 처리, 드래그로 연속 칠하기, `touch-action: none`.
+5. **지우개**: 별도 도구 모드(`currentTool: 'draw'|'erase'`), 지우개 버튼.
+6. **전체 지우기**: `window.confirm()` 확인 후 grid 초기화.
+7. **PNG 저장**: 오프스크린 캔버스에 20배 확대(320x320px)로 렌더링, `toBlob('image/png')` → `URL.createObjectURL` → 숨김 `<a download>` 클릭 → `revokeObjectURL`. 빈 칸은 그리지 않아 투명 PNG로 저장. 파일명 `pixel-art-<타임스탬프>.png`.
+8. **반응형/모바일**: viewport 메타 태그, 캔버스 `width: min(90vw, 480px)`, 터치 타깃 40px 이상, `@media (max-width: 480px)` 대응.
+9. **다크모드**: CSS 변수 + `prefers-color-scheme: dark` (블로그 본체 `js/theme.js`에 의존하지 않고 독립적으로 구현).
+10. **접근성**: 스와치에 `aria-label`/`aria-pressed`, 버튼은 기본 `<button>` 사용, color input에 `aria-label`.
+11. **블로그로 돌아가기 링크**: 상단에 `<a class="back-link" href="../../index.html">← 블로그로 돌아가기</a>`.
+12. **외부 라이브러리 사용 금지.** 순수 HTML/CSS/JS(Canvas API)만 사용.
 
-### 점수판
-- 현재 점수와 최고 점수를 함께 표시.
-- 최고 점수는 `localStorage` 키 `"2048-best-score"`로 저장하고, 현재 점수가 이를 넘으면 즉시 갱신.
-- 점수 표시 영역에 `aria-live="polite"` 부여.
+## 참고
 
-### UI/UX
-- `viewport` 메타 태그 설정 (모바일 대응).
-- 게임 보드는 CSS Grid 4x4, `aspect-ratio: 1/1`, 너비는 `min(90vw, 420px)` 형태로 반응형 처리.
-- 타일 값별 배경색(2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 이상)을 `data-value` 속성 기반으로 구분.
-- 타일 등장/병합 시 CSS `transition`/`@keyframes`로 가벼운 애니메이션(scale/pop).
-- `prefers-color-scheme: dark` 미디어 쿼리로 자체 다크모드 지원 (블로그 본체의 `js/theme.js`에 의존하지 않음).
-- 재시작 버튼은 키보드로 포커스/조작 가능해야 한다.
-- 페이지 상단에 "← 블로그로 돌아가기" 같은 링크를 `../../index.html`로 연결한다 (사용자가 앱 안에서 블로그로 돌아갈 수 있도록).
+- `/home/user/my-blog/apps/2048/` 의 기존 코드 스타일(CSS 변수, 다크모드, back-link, 반응형 패턴)을 참고해도 좋다.
 
-### 라이브러리
-- 외부 라이브러리/CDN 사용 금지. 바닐라 HTML/CSS/JS로만 구현한다.
+## 완료 후
 
-## 완료 기준
-- 세 파일이 오류 없이 함께 동작하며, 브라우저에서 `apps/2048/index.html`을 열면 게임을 플레이할 수 있어야 한다.
-- 코드에 불필요한 주석이나 과도한 추상화를 넣지 않는다.
+- 구현한 파일 목록과 핵심 구현 포인트를 요약해서 보고한다.
+- 브라우저 실행/테스트는 하지 않는다 (Review 단계에서 별도 서브에이전트가 담당).
